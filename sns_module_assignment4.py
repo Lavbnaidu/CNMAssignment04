@@ -6,17 +6,15 @@ from botocore.exceptions import ClientError
 logger = logging.getLogger()
 
 sns_client = boto3.client('sns', region_name="us-east-1")
-sub_name = sns_config.name
-sub_email= sns_config.email
 def create_topic(name):
     """
     Creates a SNS notification topic.
     """
     try:
-        topic = sns_client.create_topic(Name=sub_name)
-        logger.info(f'Created SNS topic {sub_name}.')
+        topic = sns_client.create_topic(Name=name)
+        logger.info(f'Created SNS topic {name}.')
     except ClientError:
-        logger.exception(f'Could not create SNS topic {sub_name}.')
+        logger.exception(f'Could not create SNS topic {name}.')
         raise
     else:
         return topic
@@ -40,8 +38,9 @@ def list_topics():
         return topics_list
     
 # Create email subscription
-def subscribe(topic):
-    subscription = sns_client.subscribe(TopicArn=topic, Protocol="email", Endpoint=sub_email)
+def subscribe(topic,email):
+    subscription = sns_client.subscribe(TopicArn=topic, Protocol="email", Endpoint=email)
     publishing = sns_config.publish(TopicArn=topic, 
             Message="message text", 
             Subject="subject used in emails only")
+    return subscription, publishing
